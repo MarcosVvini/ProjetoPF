@@ -30,3 +30,7 @@ const registros = linhas.map(linha => {
 //tirar o primeiro elemento.
 
 console.log(registros);
+
+//Guilherme: 
+//Quantos atletas do <pais> começam com a letra <letra> nas olimpiadas de <ano>?
+//Quais desses atletas participaram das olimpiadas de <outro ano>?
