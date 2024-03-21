@@ -2,7 +2,7 @@ const fs = require('fs');
 const dados = fs.readFileSync('teste.csv', 'utf8');
 
 // Dividir o texto em linhas
-const linhas = dados.trim().split('\n');
+const linhas = dados.trim().split('\r\n');
 
 // Dividir cada linha por vírgulas e criar um array de registros
 const registros = linhas.map(linha => {
