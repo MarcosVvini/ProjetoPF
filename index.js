@@ -1,13 +1,16 @@
 const fs = require('fs');
 const dados = fs.readFileSync('teste.csv', 'utf8');
 
-// Dividir o texto em linhas
-const linhas = dados.trim().split('\r\n');
+// Separa o texto do csv em linhas
+let linhas = dados.trim().split('\r\n');
 
-// Dividir cada linha por vírgulas e criar um array de registros
-const registros = linhas.map(linha => {
-    const valores = linha.split(',');
-    // Mapear os valores para suas respectivas chaves
+// remove o cabeçalho do csv 
+const linhasSemCabecalho = linhas.slice(1);
+
+// Divide cada linha pelas virgulas e cria um array de registros
+const registros = linhasSemCabecalho.map(linhasSemCabecalho => {
+    const valores = linhasSemCabecalho.split(',');
+    //Mapeia os valores para suas respectivas chaves, usando (/"/g, '') para substituir as aspas por string vazia 
     return {
         ID: valores[0].replace(/"/g, ''),
         Name: valores[1].replace(/"/g, ''),
@@ -27,10 +30,4 @@ const registros = linhas.map(linha => {
     };
 }); 
 
-//tirar o primeiro elemento.
-
-console.log(registros);
-
-//Guilherme: 
-//Quantos atletas do <pais> começam com a letra <letra> nas olimpiadas de <ano>?
-//Quais desses atletas participaram das olimpiadas de <outro ano>?
+console.log(registros)
