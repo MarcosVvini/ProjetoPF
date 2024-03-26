@@ -109,3 +109,37 @@ atletasNacionalidadeAno(registros)("BRA")("Summer")(2016);
 console.log()
 console.log("Quantos Atletas <Sul-americanos (testando com Brasil)> ganharam medalha de <ouro/prata/bronze(testando com ouro)> nas olimpíadas de <inverno/verão(testando com verão)> de <ano(testando com 2016)>")
 atletasMedalhaAno(registros)("BRA")("Gold")("Summer")(2016);
+
+//------------------------------------------------------------------------
+
+ //A função 'totalMedalhas' recebe o nome do atleta como parâmetro (atletaNome)
+ //Ela filtra os dados do atleta desejado usando a função filter e depois mapeia as medalhas desse atleta usando a função map.
+
+function totalMedalhas(atletaNome) {
+  const atleta = lista.filter(atleta => atleta.Name === atletaNome);
+  const medalhas = atleta.map(atleta => atleta.Medal);
+  
+//O método reduce para contar o número de medalhas de ouro, prata e bronze. 
+//A constante 'medalhasContadas' é inicializado com contadores para cada tipo de medalha (Ouro, Prata e Bronze), e a função de redução incrementa os contadores com base no tipo de medalha encontrada.
+  
+  const medalhasContadas = medalhas.reduce((contador, medalha) => {
+    if (medalha === "Gold") {
+      contador.Ouro++;
+    } else if (medalha === "Silver") {
+      contador.Prata++;
+    } else if (medalha === "Bronze") {
+      contador.Bronze++;
+    }
+    return contador;
+  }, { Ouro: 0, Prata: 0, Bronze: 0 });
+  
+//A função retorna um objeto contendo o total de medalhas de ouro, prata e bronze para o atleta desejado.
+
+  return medalhasContadas;
+}
+
+const atletaNome = "A Dijiang"; //exemplo
+const totalMedalhasAtleta = totalMedalhas(atletaNome);
+console.log(`Total de medalhas de ouro: ${totalMedalhasAtleta.Ouro}`);
+console.log(`Total de medalhas de prata: ${totalMedalhasAtleta.Prata}`);
+console.log(`Total de medalhas de bronze: ${totalMedalhasAtleta.Bronze}`);
