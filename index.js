@@ -61,6 +61,48 @@ const atletasMedalhaAno = (lista) => (paisSula) => (medalha) => (season) => (ano
     imprimirResultado(medalhistas.length, "Atleta", "Atletas", medalhistas);
 };
 
+//Guilherme Questões----------------------------------------------------
+//Quais atletas de <país>, que começam com a letra <tal>, participaram nas Olimpíadas de <ano>? Quantos?
+////////////////////////////////////////////////////////////////////////
+const AtletasqueParticiparamAno1 = (data,pais,letra,ano ) => {
+    //filtragem a partir do país fornecido
+    const filt1 = data.filter((p) => p.Team == pais)
+    //filtragem a partir da primeira letra fornecida pelo usuário
+    const filt2 = filt1.filter((l) => l.Name[0] == letra)
+    const filt3 = filt2.filter((a) => a.Year == ano)
+    //subfunção para tirar as repetições de atletas que já apareceram
+    const DelDuplo = (lista) => lista.reduce((acc, item) => {
+        // Verifica se o ID do atleta já está presente na lista
+        const idPresente = acc.some((id) => id.ID == item.ID);
+        // Se o ID não estiver presente, adiciona o item à lista
+        return idPresente ? acc : [...acc, item];}, []);
+    return DelDuplo(filt3)
+}
+////////////////////////////////////////////////////////////////////////////
+
+//Quais desses atletas participaram nas Olimpíadas de <outro ano>? Quais deles ganharam medalha de <medalha>
+//nesse ano?
+const AtletasOutroAno = (outroano,medal) => {
+    //Verificação de lista vazia
+    if(AtletasqueParticiparamAno1(registros,'France','E',outroano) == []){
+        return 'Não houve nenhum atleta que participou de outro ano'
+    }
+    //Filtragem através das medalhas ganhadas pelo atleta
+    else{ const info = AtletasqueParticiparamAno1(registros,'Brazil','E',outroano)
+            const infoTotal = info.filter((inf) => inf.Medal == medal )
+            if(infoTotal == []){
+                console.log('Os atletas seguintes participaram, mas não ganharam medalhas /n')
+                return info
+            }
+            else{ console.log('re')
+                return infoTotal}
+}
+}
+//-----------------------------------------------------------------------
+
+console.log(AtletasqueParticiparamAno1(registros,'Brazil', 'E',1996));
+console.log(AtletasOutroAno(2016,1))
+
 
 console.log("Quantos atletas competiram pelo <país(testando com Brasil)> nos Jogos Olímpicos de <inverno/verão(testando com verão)> de <ano(testando com 2016)>?")
 atletasNacionalidadeAno(registros)("BRA")("Summer")(2016);
