@@ -212,7 +212,7 @@ const AtletasOutroAno = (outroano,medal,data) => {
  //A função 'totalMedalhas' recebe o nome do atleta como parâmetro (atletaNome)
  //Ela filtra os dados do atleta desejado usando a função filter e depois mapeia as medalhas desse atleta usando a função map.
 
-function totalMedalhas(atletaNome) {
+const totalMedalhas = (atletaNome) => {
   const atleta = lista.filter(atleta => atleta.Name === atletaNome);
   const medalhas = atleta.map(atleta => atleta.Medal);
   
