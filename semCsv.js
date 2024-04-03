@@ -1,5 +1,3 @@
-const csv = require('csv-parser');
-
 const csvatletas = [{
     ID: "1", Name: "A Dijiang", Age : 21, Team: "China", Year: 2016, Season: "Summer", Sport: "Basketball", Medal: "Bronze"
 }, {
@@ -51,39 +49,6 @@ const csvatletas = [{
 {ID: "21", Name: "joao", Age : 24, Team: "Brazil", Year: 1912, Season:"Summer", Sport:"Swimming", Medal: "Bronze"}
 ];
 
-const lerArquivoCsv = async (caminhoArquivo) => {
-    try {
-        const response = await fetch(caminhoArquivo);
-        if (!response.ok) {
-            throw new Error('Falha ao carregar o arquivo');
-        }
-        const csvContent = await response.text();
-        return csvContent;
-    } catch (err) {
-        throw err;
-    }
-};
-  
-function parseCSV(athlete_events) {
-const lines = csv.split(/\r?\n/);
-const [cabecalho, ...linhasDados] = lines;
-
-const camposCabecalho = cabecalho.split(',');
-const copiaCampoCabecalho = [...camposCabecalho].map(item => item.replace(/"/g, ''));
-
-const dados = linhasDados.map(linha => {
-    const campos = linha.split(/,(?=(?:(?:[^"]"){2})[^"]*$)/);
-    return campos.reduce((obj, campo, index) => {
-        obj[copiaCampoCabecalho[index]] = campo.replace(/"/g, '');
-        return obj;
-    }, {});
-});
-
-return dados;
-}
-
-lerArquivoCsv("athlete_events.csv")
-dadosCsv = parseCSV("athlete_events.csv")
 
 // função que vai filtrar os atletas por pais ue representou e ano.
 const atletasNacionalidadeAno = (lista) => (pais) => (ano) => {
@@ -136,11 +101,11 @@ const removerDuplicatas = (lista) => lista.reduce((acc, item) => {
 
 // criando variavel que vai receber as funções acima passando a lista (utilizando função como expressao sla)
 
-const filtroq1 = atletasNacionalidadeAno(dadosCsv);
-const filtroq2 = atletasMedalhaAno(dadosCsv);
-const filtroq3 = AtletasqueParticiparamAno(dadosCsv)
-const filtroq4 = encontrarAtletaMaisVelho(dadosCsv)
-const filtroq5 = calcularMediaIdade(dadosCsv)
+const filtroq1 = atletasNacionalidadeAno(csvatletas);
+const filtroq2 = atletasMedalhaAno(csvatletas);
+const filtroq3 = AtletasqueParticiparamAno(csvatletas)
+const filtroq4 = encontrarAtletaMaisVelho(csvatletas)
+const filtroq5 = calcularMediaIdade(csvatletas)
 
 // listas para os selects
 
