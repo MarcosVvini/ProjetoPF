@@ -1,242 +1,395 @@
-const fs = require('fs');
-const csv = require('csv-parser');
-
-// processar os registros com os dados dos atletas
-const processarLinhas = (linha) => {
-    const valores = Object.values(linha);
-    return {
-        ID: valores[0],
-        Name: valores[1],
-        Sex: valores[2],
-        Age: parseInt(valores[3]),
-        Height: valores[4] === 'NA' ? null : parseInt(valores[4]),
-        Weight: valores[5] === 'NA' ? null : parseInt(valores[5]),
-        Team: valores[6],
-        NOC: valores[7],
-        Games: valores[8],
-        Year: parseInt(valores[9]),
-        Season: valores[10],
-        City: valores[11],
-        Sport: valores[12],
-        Event: valores[13],
-        Medal: valores[14] === 'NA' ? null : valores[14]
-    };
+// Funcoes relacionadas a leitura e manipulação de arquivos CSV
+const lerArquivoCsv = async (caminhoArquivo) => {
+    try {
+        const response = await fetch(caminhoArquivo);
+        if (!response.ok) {
+            throw new Error('Falha ao carregar o arquivo');
+        }
+        const csvContent = await response.text();
+        return csvContent;
+    } catch (err) {
+        throw err;
+    }
 };
 
-// vai ler o arquivo csv e criar uma lista que sera preenchida com os registros de cada atleta
-const lerCSV = (caminhoArquivo) => {
-    const registrosProcessados = [];
+const parseCSV = (csv) => {
+    const lines = csv.split(/\r?\n/);
+    const [cabecalho, ...linhasDados] = lines;
 
-    fs.createReadStream(caminhoArquivo)
-        .pipe(csv())
-        .on('data', (linha) => {
-            const registro = processarLinhas(linha);
-            registrosProcessados.push(registro);
-        })
-        .on('end', () => {
-            console.log('Fim do arquivo CSV.');
+    const camposCabecalho = cabecalho.split(',');
+    const camposCabecalhoFormatados = camposCabecalho.map(item => item.replace(/"/g, ''));
 
-            //Executar consultas após o processamento
-            const q1 = atletasNacionalidadeAno(registrosProcessados)("BRA")("Summer")(2016);
-            const q2 = atletasMedalhaAno(registrosProcessados)("BRA")("Silver")("Summer")(2016);
-            imprimirResultado(q1.length, "Atleta", "Atletas", q1);
-            console.log();
-            imprimirResultado(q2.length, "Atleta", "Atletas", q2);
-
-            const mediaidade = calcularMediaIdade(registrosProcessados)("BRA")(2016);
-            console.log(`A média de idade dos atletas <xpais> em <xano> foi de: ${mediaidade} Anos.`);
-            const mediaAltura = calcularMediaAltura(registrosProcessados)("BRA")(2016);
-            console.log(`A média de Tamanho dos atletas <xpais> em <xano> foi de: ${mediaAltura/100} Metros.`);
-            const mediaPeso = calcularMediaPeso(registrosProcessados)("BRA")(2016);
-            console.log(`A média de Peso dos atletas <xpais> em <xano> foi de: ${mediaPeso} Metros.`);
-
-            const maisVelho = encontrarAtletaMaisVelho(registrosProcessados)("BRA")(2016);
-            const maisNovo = encontrarAtletaMaisNovo(registrosProcessados)("BRA")(2016);
-            const maisPesado = encontrarAtletaMaisPesado(registrosProcessados)("BRA")(2016);
-            const maisLeve = encontrarAtletaMaisLeve(registrosProcessados)("BRA")(2016);
-
-            console.log("Atleta mais velho do <xpais> em <xano>:", maisVelho);
-            console.log("Atleta mais novo do <xpais> em <xano>:", maisNovo);
-            console.log("Atleta mais pesado do <xpais> em <xano>:", maisPesado);
-            console.log("Atleta mais leve do <xpais> em <xano>:", maisLeve);
-    
-            const atletaMaisVelhoComMedalha = encontrarAtletaMaisVelhoComMedalha(registrosProcessados)("BRA")("Gold")(2016);
-            if (atletaMaisVelhoComMedalha) {
-                console.log(`O atleta mais velho do <xpais> que recebeu medalha de <xmedalha> em <xano> foi: ${atletaMaisVelhoComMedalha.Name} com ${atletaMaisVelhoComMedalha.Age} anos no ${atletaMaisVelhoComMedalha.Sport}.`);
-            } else {
-                console.log("Não foi encontrado nenhum atleta com a medalha especificada.");
-            }
-            const atletaMaisNovoComMedalha = encontrarAtletaMaisNovoComMedalha(registrosProcessados)("BRA")("Gold")(2016);
-            if (atletaMaisNovoComMedalha) {
-                console.log(`O atleta mais novo do <xpais> que recebeu medalha de <xmedalha> em <xano> foi: ${atletaMaisNovoComMedalha.Name} com ${atletaMaisNovoComMedalha.Age} anos no ${atletaMaisNovoComMedalha.Sport}.`);
-            } else {
-                console.log("Não foi encontrado nenhum atleta com a medalha especificada.");
-            }
-            //------------------------------------console.log----------------------------------------------------------------------------------
-            
-            console.log(AtletasqueParticiparamAno1(registrosProcessados,'Brazil','E',1996))
-            console.log(AtletasOutroAno(2016,'Bronze',registrosProcessados))
-
-        })
-        //caso tenha problema ao ler o arquivo csv
-        .on('error', (error) => {
-            console.error('Erro ao ler o arquivo CSV:', error);
+    const dados = linhasDados.map(linha => {
+        const campos = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        const objeto = {};
+        campos.forEach((campo, index) => {
+            const campoFormatado = campo.replace(/"/g, '');
+            objeto[camposCabecalhoFormatados[index]] = campoFormatado;
         });
+        return objeto;
+    });
+
+    return dados.map(item => ({
+        ID: item.ID,
+        Name: item.Name,
+        Age: item.Age,
+        Team: item.Team ? item.Team.replace('-1', '') : '', //testando pois tive problema com undefined. to trocando o -1 por str vazia pois alguns times eram Brazil-1 por ex...
+        Year: parseInt(item.Year),
+        Season: item.Season,
+        Sport: item.Sport,
+        Medal: item.Medal
+    }));
 };
 
-lerCSV('athlete_events.csv');
-//funções Marcos----------------------------------------------------------------
-// Funções de consulta
-const atletasNacionalidadeAno = (lista) => (paisAbrev) => (season) => (ano) => {
-    const atletas = lista.filter(item => item.NOC === paisAbrev && item.Season === season && item.Year === ano);
+// Constante para o caminho do arquivo de atletas
+const caminhoArquivoAtletas = 'athlete_events.csv';
+
+// Funcoes relacionadas ao filtro e processamento dos dados dos atletas
+const atletasNacionalidadeAno = (lista) => (pais) => (ano) => {
+    const atletas = lista.filter(item => item.Team === pais && item.Year === ano);
     return removerDuplicatas(atletas);
 };
 
-const atletasMedalhaAno = (lista) => (paisSula) => (medalha) => (season) => (ano) => {
-    const medalhistas = lista.filter(item => item.NOC === paisSula && item.Medal === medalha && item.Season === season && item.Year === ano);
+const atletasMedalhaAno = (lista) => (pais) => (medalha) => (ano) => {
+    const medalhistas = lista.filter(item => item.Team === pais && item.Medal === medalha && item.Year === ano);
     return removerDuplicatas(medalhistas);
 };
 
-// Funções utilitárias
+const encontrarAtletaMaisVelho = (lista) => (pais) => (ano) => {
+    const atletasDoPaisNoAno = lista.filter(item => item.Team === pais && item.Year === ano);
+    if (atletasDoPaisNoAno.length === 0) {
+        return null;
+    }
+    const atletaMaisVelho = atletasDoPaisNoAno.reduce((maisVelho, atleta) => atleta.Age > maisVelho.Age ? atleta : maisVelho);
+    return atletaMaisVelho;
+};
+
+const encontrarAtletaMaisNovo = (lista) => (pais) => (ano) => {
+    const atletasDoPaisNoAno = lista.filter(item => item.Team === pais && item.Year === ano);
+    if (atletasDoPaisNoAno.length === 0) {
+        return null;
+    }
+    const atletaMaisNovo = atletasDoPaisNoAno.reduce((maisNovo, atleta) => atleta.Age < maisNovo.Age ? atleta : maisNovo);
+    return atletaMaisNovo;
+};
+
+const AtletasqueParticiparamAno = (lista) => (letra) => (ano) => {
+    const filt1 = lista.filter((p) => (p.Team == "Argentina") || (p.Team == "Bolivia") || (p.Team == "Brazil") 
+        || (p.Team == "Chile") || (p.Team == "Colombia") || (p.Team == "Ecuador") || (p.Team == "Guyana") || (p.Team == "Paraguay")
+        || (p.Team == "Peru") || (p.Team == "Suriname") || (p.Team == "Uruguay") || (p.Team == "Venezuela"))
+    const filt2 = filt1.filter((l) => l.Name[0] == letra)
+    const filt3 = filt2.filter((a) => a.Year == ano)
+    return removerDuplicatas(filt3)
+}
+
+const totalMedalhasPorPais = (lista) => (pais1) => (pais2) => (ano) => {
+    const atletasDoPais1NoAno = lista.filter(item => item.Team === pais1 && item.Year === ano && item.Medal !== '');
+    const atletasDoPais2NoAno = lista.filter(item => item.Team === pais2 && item.Year === ano && item.Medal !== '');
+
+
+    const medalhasPorAtleta1 = atletasDoPais1NoAno.map(atleta => atleta.Medal);
+    const medalhasPorAtleta2 = atletasDoPais2NoAno.map(atleta => atleta.Medal);
+
+    const contagemMedalhas1 = medalhasPorAtleta1.reduce((contador, medalha) => {
+        return {
+            ...contador,
+            [medalha]: (contador[medalha] || 0) + 1
+        };
+    }, { Gold: 0, Silver: 0, Bronze: 0 });
+    const contagemMedalhas2 = medalhasPorAtleta2.reduce((contador, medalha) => {
+        return {
+            ...contador,
+            [medalha]: (contador[medalha] || 0) + 1
+        };
+    }, { Gold: 0, Silver: 0, Bronze: 0 });
+
+    return [contagemMedalhas1,contagemMedalhas2];
+};
+  
+
 const removerDuplicatas = (lista) => lista.reduce((acc, item) => {
     const idPresente = acc.some(existingItem => existingItem.ID == item.ID);
     return idPresente ? acc : [...acc, item];
 }, []);
 
-const formatarListaAtletas = (atletas) => atletas.map(item => `${item.Name} (${item.Sport})`);
-
-const imprimirResultado = (quantidade, singular, plural, atletas) => {
-    console.log(`${quantidade} ${(quantidade < 2 ? singular : plural)}:`);
-    console.log(formatarListaAtletas(atletas));
+// Funcao relacionada a adição de opções nos elementos <select> do HTML
+const adicionarOpcaoSelect = (id, opcoes) => {
+    const select = document.querySelector(`#${id}`);
+    const optionsElements = opcoes.map(opcao => {
+        const optionElement = document.createElement('option');
+        optionElement.value = opcao;
+        optionElement.textContent = opcao;
+        return optionElement;
+    });
+    select.append(...optionsElements);
 };
 
-// Função para calcular a média de idade dos atletas de um país em um ano específico
-const calcularMediaIdade = (lista) => (paisAbrev) => (ano) => {
-    const atletasDoPais = lista.filter(item => item.NOC === paisAbrev && item.Year === ano);
-    const idades = atletasDoPais.map(atleta => atleta.Age);
-    const somaIdades = idades.reduce((acc, idade) => acc + idade, 0);
-    const mediaIdade = somaIdades / idades.length;
-    return mediaIdade;
-};
-const calcularMediaAltura = (lista) => (paisAbrev) => (ano) => {
-    const atletasDoPais = lista.filter(item => item.NOC === paisAbrev && item.Year === ano);
-    const alturas = atletasDoPais.map(atleta => atleta.Height);
-    const somaAltura = alturas.reduce((acc, altura) => acc + altura, 0);
-    const mediaAltura = somaAltura / alturas.length;
-    return mediaAltura;
-};
-const calcularMediaPeso = (lista) => (paisAbrev) => (ano) => {
-    const atletasDoPais = lista.filter(item => item.NOC === paisAbrev && item.Year === ano);
-    const pesos = atletasDoPais.map(atleta => atleta.Weight);
-    const somaPeso = pesos.reduce((acc, peso) => acc + peso, 0);
-    const mediaPeso = somaPeso / pesos.length;
-    return mediaPeso;
+const valSelecQ1 = (selectPais, selectAno) => {
+    const paisSelecionado = selectPais.value;
+    const anoSelecionado = parseInt(selectAno.value);
+    return [paisSelecionado, anoSelecionado];
 };
 
-// Função para encontrar o atleta mais velho de certo país em certo ano
-const encontrarAtletaMaisVelho = (lista) => (paisAbrev) => (ano) => {
-    const atletasDoPaisNoAno = lista.filter(item => item.NOC === paisAbrev && item.Year === ano);
-    return atletasDoPaisNoAno.reduce((maisVelho, atleta) => atleta.Age > maisVelho.Age ? atleta : maisVelho);
+const valSelecQ2 = (selectPaisQ2, selectMedalhaQ2, selectAnoQ2) => {
+    const paisSelecionadoQ2 = selectPaisQ2.value;
+    const medalhaSelecionadaQ2 = selectMedalhaQ2.value;
+    const anoSelecionadoQ2 = parseInt(selectAnoQ2.value);
+    return [paisSelecionadoQ2, medalhaSelecionadaQ2, anoSelecionadoQ2];
 };
 
-// Função para encontrar o atleta mais novo de certo país em certo ano
-const encontrarAtletaMaisNovo = (lista) => (paisAbrev) => (ano) => {
-    const atletasDoPaisNoAno = lista.filter(item => item.NOC === paisAbrev && item.Year === ano);
-    return atletasDoPaisNoAno.reduce((maisNovo, atleta) => atleta.Age < maisNovo.Age ? atleta : maisNovo);
+const valSelecQ3 = (selectLetraQ3, selectAnoQ3) => {
+    const letraSelecionadaQ3 = selectLetraQ3.value;
+    const anoSelecionadoQ3 = parseInt(selectAnoQ3.value);
+    return [letraSelecionadaQ3, anoSelecionadoQ3];
 };
 
-// Função para encontrar o atleta mais pesado de certo país em certo ano
-const encontrarAtletaMaisPesado = (lista) => (paisAbrev) => (ano) => {
-    const atletasDoPaisNoAno = lista.filter(item => item.NOC === paisAbrev && item.Year === ano && item.Weight !== null);
-    return atletasDoPaisNoAno.reduce((maisPesado, atleta) => atleta.Weight > maisPesado.Weight ? atleta : maisPesado);
+const valSelecQ4 = (selectPaisQ4, selectAnoQ4) => {
+    const paisSelecionadoQ4 = selectPaisQ4.value;
+    const anoSelecionadoQ4 = parseInt(selectAnoQ4.value);
+    return [paisSelecionadoQ4, anoSelecionadoQ4];
 };
 
-// Função para encontrar o atleta mais leve de certo país em certo ano
-const encontrarAtletaMaisLeve = (lista) => (paisAbrev) => (ano) => {
-    const atletasDoPaisNoAno = lista.filter(item => item.NOC === paisAbrev && item.Year === ano && item.Weight !== null);
-    return atletasDoPaisNoAno.reduce((maisLeve, atleta) => atleta.Weight < maisLeve.Weight ? atleta : maisLeve);
+const valSelecQ5 = (selectPaisQ51,selectPaisQ52, selectAnoQ5) => {
+    const paisSelecionadoQ51 = selectPaisQ51.value;
+    const paisSelecionadoQ52 = selectPaisQ52.value;
+    const anoSelecionadoQ5 = parseInt(selectAnoQ5.value);
+    return [paisSelecionadoQ51, paisSelecionadoQ52, anoSelecionadoQ5];
 };
 
-// Função para encontrar o atleta mais velho que recebeu uma medalha específica de um país em um ano
-const encontrarAtletaMaisVelhoComMedalha = (lista) => (paisAbrev) => (medalha) => (ano) => {
-    return lista
-        .filter(item => item.NOC === paisAbrev && item.Medal === medalha && item.Year === ano)
-        .reduce((maisVelho, atual) => (!maisVelho || atual.Age > maisVelho.Age) ? atual : maisVelho, null);
-};
-// Função para encontrar o atleta mais novo que recebeu uma medalha específica de um país em um ano
-const encontrarAtletaMaisNovoComMedalha = (lista) => (paisAbrev) => (medalha) => (ano) => {
-    return lista
-        .filter(item => item.NOC === paisAbrev && item.Medal === medalha && item.Year === ano)
-        .reduce((maisNovo, atual) => (!maisNovo || atual.Age < maisNovo.Age) ? atual : maisNovo, null);
-};
+// Event listeners para os botoes de busca
+document.addEventListener("DOMContentLoaded", async () => {
+    const paises = ["Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Ecuador", "Guyana", "Paraguay", "Peru", "Suriname", "Uruguay", "Venezuela"];
+    const anos = [2000, 2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016];
+    const medalha = ["Gold", "Silver", "Bronze"]
+    const letras = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
-//funções Guilherme---------------------------------------------------------------- 
+    adicionarOpcaoSelect("listaPaisQ1", paises);
+    adicionarOpcaoSelect("listaAnoQ1", anos);
+    adicionarOpcaoSelect("listaPaisQ2", paises);
+    adicionarOpcaoSelect("listaMedalhaQ2", medalha);
+    adicionarOpcaoSelect("listaAnoQ2", anos);
+    adicionarOpcaoSelect("listaLetraQ3", letras);
+    adicionarOpcaoSelect("listaAnoQ3", anos);
+    adicionarOpcaoSelect("listaPaisQ4", paises);
+    adicionarOpcaoSelect("listaAnoQ4", anos);
+    adicionarOpcaoSelect("listaPaisQ5-1", paises);
+    adicionarOpcaoSelect("listaPaisQ5-2", paises);
+    adicionarOpcaoSelect("listaAnoQ5", anos);
 
-const AtletasqueParticiparamAno1 = (data,pais,letra,ano ) => {
-    //filtragem a partir do país fornecido
-    const filt1 = data.filter((p) => p.Team == pais)
-    //filtragem a partir da primeira letra fornecida pelo usuário
-    const filt2 = filt1.filter((l) => l.Name[0] == letra)
-    const filt3 = filt2.filter((a) => a.Year == ano)
-    //subfunção para tirar as repetições de atletas que já apareceram
-    const DelDuplo = (lista) => lista.reduce((acc, item) => {
-        // Verifica se o ID do atleta já está presente na lista
-        const idPresente = acc.some((id) => id.ID == item.ID);
-        // Se o ID não estiver presente, adiciona o item à lista
-        return idPresente ? acc : [...acc, item];}, []);
-    return DelDuplo(filt3)
-}
-////////////////////////////////////////////////////////////////////////////
+    const botaoBuscar = document.querySelector('#botao-buscar-q1');
+    botaoBuscar.addEventListener("click", async () => {
+        const selectPais = document.querySelector("#listaPaisQ1");
+        const selectAno = document.querySelector("#listaAnoQ1");
+        const [paisSelecionado, anoSelecionado] = valSelecQ1(selectPais, selectAno);
 
-//Quais desses atletas participaram nas Olimpíadas de <outro ano>? Quais deles ganharam medalha de <medalha>
-//nesse ano?
-const AtletasOutroAno = (outroano,medal,data) => {
-    //Verificação de lista vazia
-    if(AtletasqueParticiparamAno1(data,'France','E',outroano) == []){
-        return 'Não houve nenhum atleta que participou de outro ano'
-    }
-    //Filtragem através das medalhas ganhadas pelo atleta
-    else{ const info = AtletasqueParticiparamAno1(data,'Brazil','E',outroano)
-            const infoTotal = info.filter((inf) => inf.Medal == medal )
-            if(infoTotal == []){
-                console.log('Os atletas seguintes participaram, mas não ganharam medalhas /n')
-                return info
-            }
-            else{ console.log('Lista dos atletas')
-                return infoTotal}
-}
-}
+        try {
+            document.getElementById('spinner-q1').classList.remove('d-none');
 
-//funções Davi----------------------------------------------------------------
+            const conteudoArquivo = await lerArquivoCsv(caminhoArquivoAtletas);
+            const csvAtletas = parseCSV(conteudoArquivo);
 
- //A função 'totalMedalhas' recebe o nome do atleta como parâmetro (atletaNome)
- //Ela filtra os dados do atleta desejado usando a função filter e depois mapeia as medalhas desse atleta usando a função map.
+            const filtroQ1 = atletasNacionalidadeAno(csvAtletas);
+            const resultadoFiltro = filtroQ1(paisSelecionado)(anoSelecionado);
 
-function totalMedalhas(atletaNome) {
-  const atleta = lista.filter(atleta => atleta.Name === atletaNome);
-  const medalhas = atleta.map(atleta => atleta.Medal);
-  
-//O método reduce para contar o número de medalhas de ouro, prata e bronze. 
-//A constante 'medalhasContadas' é inicializado com contadores para cada tipo de medalha (Ouro, Prata e Bronze), e a função de redução incrementa os contadores com base no tipo de medalha encontrada.
-  
-  const medalhasContadas = medalhas.reduce((contador, medalha) => {
-    if (medalha === "Gold") {
-      contador.Ouro++;
-    } else if (medalha === "Silver") {
-      contador.Prata++;
-    } else if (medalha === "Bronze") {
-      contador.Bronze++;
-    }
-    return contador;
-  }, { Ouro: 0, Prata: 0, Bronze: 0 });
-  
-//A função retorna um objeto contendo o total de medalhas de ouro, prata e bronze para o atleta desejado.
+            const modalPerguntaUm = document.getElementById('modalPerguntaUm');
+            const tableBody = modalPerguntaUm.querySelector('.table tbody');
 
-  return medalhasContadas;
-}
+            const listaAtletasHTML = resultadoFiltro.map(item => `
+                <tr>
+                    <td>${item.Name}</td>
+                    <td>${item.Sport}</td>
+                </tr>
+            `).join('');
 
-const atletaNome = "A Dijiang"; //exemplo
-const totalMedalhasAtleta = totalMedalhas(atletaNome);
-console.log(`Total de medalhas de ouro: ${totalMedalhasAtleta.Ouro}`);
-console.log(`Total de medalhas de prata: ${totalMedalhasAtleta.Prata}`);
-console.log(`Total de medalhas de bronze: ${totalMedalhasAtleta.Bronze}`);
+            tableBody.innerHTML = `
+                <h3>${resultadoFiltro.length} Atletas.</h3>
+                <tr>
+                    <th>Nome do Atleta</th>
+                    <th>Esporte</th>
+                </tr>
+                ${listaAtletasHTML}
+            `;
+
+        } catch (err) {
+            console.error('Erro ao ler o arquivo:', err);
+        } finally {
+            document.getElementById('spinner-q1').classList.add('d-none');
+        }
+    });
+
+    const botaoBuscarQ2 = document.querySelector('#botao-buscar-q2');
+    botaoBuscarQ2.addEventListener("click", async () => {
+        const selectPaisQ2 = document.querySelector("#listaPaisQ2");
+        const selectMedalhaQ2 = document.querySelector("#listaMedalhaQ2")
+        const selectAnoQ2 = document.querySelector("#listaAnoQ2");
+        const selecionado = valSelecQ2(selectPaisQ2, selectMedalhaQ2, selectAnoQ2);
+        const [paisSelecionadoQ2, medalhaSelecionadaQ2, anoSelecionadoQ2] = selecionado;
+
+        try {
+            document.getElementById('spinner-q2').classList.remove('d-none');
+
+            const conteudoArquivo = await lerArquivoCsv(caminhoArquivoAtletas);
+            const csvAtletas = parseCSV(conteudoArquivo);
+
+            const filtroq2 = atletasMedalhaAno(csvAtletas);
+            const resultadoFiltro = filtroq2(paisSelecionadoQ2)(medalhaSelecionadaQ2)(parseInt(anoSelecionadoQ2));
+
+            const modalPerguntaDois = document.getElementById('modalPerguntaDois');
+            const tableBody = modalPerguntaDois.querySelector('.table tbody');
+
+            const listaAtletasHTML = resultadoFiltro.map(item => `
+                <tr>
+                    <td>${item.Name}</td>
+                    <td>${item.Sport}</td>
+                </tr>
+            `).join('');
+
+            tableBody.innerHTML = `
+                <h3>${resultadoFiltro.length} Atletas.</h3>
+                <tr>
+                    <th>Nome do Atleta</th>
+                    <th>Esporte</th>
+                </tr>
+                ${listaAtletasHTML}
+            `;
+
+        } catch (err) {
+            console.error('Erro ao ler o arquivo:', err);
+        } finally {
+            document.getElementById('spinner-q2').classList.add('d-none');
+        }
+    });
+
+    const botaoBuscarQ3 = document.querySelector("#botao-buscar-q3");
+    botaoBuscarQ3.addEventListener("click", async () => {
+        const selectLetraQ3 = document.querySelector("#listaLetraQ3")
+        const selectAnoQ3 = document.querySelector("#listaAnoQ3");
+        const selecionado = valSelecQ3(selectLetraQ3, selectAnoQ3);
+        const [letraSelecionadaQ3, anoSelecionadoQ3] = selecionado;
+
+        try {
+            document.getElementById('spinner-q3').classList.remove('d-none');
+
+            const conteudoArquivo = await lerArquivoCsv(caminhoArquivoAtletas);
+            const csvatletas = parseCSV(conteudoArquivo);
+
+            const filtroq3 = AtletasqueParticiparamAno(csvatletas);
+            const resultadoFiltro = filtroq3(letraSelecionadaQ3)(parseInt(anoSelecionadoQ3));
+
+            const modalPerguntaTres = document.getElementById('modalPerguntaTres');
+            const tableBody = modalPerguntaTres.querySelector('.table tbody');
+
+            const listaAtletasHTML = resultadoFiltro.map(item => `
+                <tr>
+                    <td>${item.Name}</td>
+                    <td>${item.Sport}</td>
+                    <td>${item.Team}</td>
+                </tr>
+            `).join('');
+
+            tableBody.innerHTML = `
+                <h3>${resultadoFiltro.length} Atletas.</h3>
+                <tr>
+                    <th>Nome do Atleta</th>
+                    <th>Esporte</th>
+                    <th>País</th>
+                </tr>
+                ${listaAtletasHTML}
+            `;
+        } catch (err) {
+            console.error('Erro ao ler o arquivo:', err);
+        } finally {
+            document.getElementById('spinner-q3').classList.add('d-none');
+        }
+    });
+
+    const botaoBuscarQ4 = document.querySelector("#botao-buscar-q4");
+    botaoBuscarQ4.addEventListener("click", async () => {
+        const selectPaisQ4 = document.querySelector("#listaPaisQ4");
+        const selectAnoQ4 = document.querySelector("#listaAnoQ4");
+        const selecionado = valSelecQ4(selectPaisQ4, selectAnoQ4);
+        const [paisSelecionadoQ4, anoSelecionadoQ4] = selecionado;
+
+        try {
+            document.getElementById('spinner-q4').classList.remove('d-none');
+
+            const conteudoArquivo = await lerArquivoCsv(caminhoArquivoAtletas);
+            const csvatletas = parseCSV(conteudoArquivo);
+
+            const filtroq4Velho = encontrarAtletaMaisVelho(csvatletas);
+            const filtroq4nNovo = encontrarAtletaMaisNovo(csvatletas);
+            const resultadoFiltroVelho = filtroq4Velho(paisSelecionadoQ4)(parseInt(anoSelecionadoQ4));
+            const resultadoFiltroNovo = filtroq4nNovo(paisSelecionadoQ4)(parseInt(anoSelecionadoQ4));
+
+            const tableBody = document.getElementById('tabelaQ4');
+            tableBody.innerHTML = `
+            <tr>
+                <td colspan="3">Mais Velho</td>
+            </tr>
+            <tr>
+                <td>Nome: ${resultadoFiltroVelho.Name}</td>
+                <td>Idade: ${resultadoFiltroVelho.Age} anos</td>
+                <td>Esporte: ${resultadoFiltroVelho.Sport}</td>
+            </tr>
+            <tr>
+                <td colspan="3">Mais Novo</td>
+            </tr>
+            <tr>
+                <td>Nome: ${resultadoFiltroNovo.Name}</td>
+                <td>Idade: ${resultadoFiltroNovo.Age} anos</td>
+                <td>Esporte: ${resultadoFiltroNovo.Sport}</td>
+            </tr>
+            `;
+
+        } catch (err) {
+            console.error('Erro ao ler o arquivo:', err);
+        } finally {
+            document.getElementById('spinner-q4').classList.add('d-none');
+        }
+    });
+
+    const botaoBuscarQ5 = document.querySelector("#botao-buscar-q5");
+    botaoBuscarQ5.addEventListener("click", async () => {
+        const selectPaisQ51 = document.querySelector("#listaPaisQ5-1");
+        const selectPaisQ52 = document.querySelector("#listaPaisQ5-2");
+        const selectAnoQ5 = document.querySelector("#listaAnoQ5");
+        const selecionado = valSelecQ5(selectPaisQ51, selectPaisQ52, selectAnoQ5);
+        const [paisSelecionadoQ51, paisSelecionadoQ52, anoSelecionadoQ5] = selecionado;
+
+        try {
+            document.getElementById('spinner-q5').classList.remove('d-none');
+
+            const conteudoArquivo = await lerArquivoCsv(caminhoArquivoAtletas);
+            const csvatletas = parseCSV(conteudoArquivo);
+
+            const filtroq5 = totalMedalhasPorPais(csvatletas);
+            const resultadoFiltroMedalhaPais = filtroq5(paisSelecionadoQ51)(paisSelecionadoQ52)(parseInt(anoSelecionadoQ5));
+
+            const tableBody = document.getElementById('tabelaQ5');
+            tableBody.innerHTML = `
+            <tr>
+                <td>${paisSelecionadoQ51}</td>
+                <td>${paisSelecionadoQ52}</td>
+            </tr>
+            <tr>
+                <td>Ouro: ${resultadoFiltroMedalhaPais[0].Gold} Atletas</td>
+                <td>Ouro: ${resultadoFiltroMedalhaPais[1].Gold} Atletas</td>
+            </tr>
+            <tr>
+                <td>Prata: ${resultadoFiltroMedalhaPais[0].Silver} Atletas</td>
+                <td>Prata: ${resultadoFiltroMedalhaPais[1].Silver} Atletas</td>
+            </tr>
+            <tr>
+                <td>Bronze: ${resultadoFiltroMedalhaPais[0].Bronze} Atletas</td>
+                <td>Bronze: ${resultadoFiltroMedalhaPais[1].Bronze} Atletas</td>
+            </tr>
+            `;
+
+        } catch (err) {
+            console.error('Erro ao ler o arquivo:', err);
+        } finally {
+            document.getElementById('spinner-q5').classList.add('d-none');
+        }
+    });
+
+});
