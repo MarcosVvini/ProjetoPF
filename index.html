@@ -2,22 +2,32 @@
 <html lang="pt-BR">
 
 <head>
+    <!--A tag meta guarda dados essenciais que de outra forma não seria possível com outras tags-->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universo Olímpico</title>
+    <!--tag para título do site-->
+    <title>Universo Olímpico da América do Sul</title>
+    <!--A tag link referencia os moldes e fontes necessários para estilizar o website-->
     <link rel="icon" href="./img/Ufs_principal_positiva-nova.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!--A tag script referencia o arquivo Javascript (E seu caminho) com as funções que serão usadas nos blocos contidos no corpo da página-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
     <script src="index.js"></script>
 </head>
 
+<!--Início do corpo da página (Para fins de clareza e facilidade ao ler o código)-->
 <body class="bg-secondary">
+    <!--Cabeçalho da página-->
     <nav class="navbar navbar-expand-lg bg-dark sticky-top">
         <div class="container-fluid">
+            <!--a tag <a> serve como âncora para usar dados-->
             <a class="navbar-brand p-2" href="#">
+                <!--Devido a sua natureza auto-explicativa, a tag de imagem só será comentada nessa instância-->
                 <img src="./img/ufs_principal_positiva.png" alt="" width="62" height="50" class="d-inline-block align-text-top text-center">
             </a>
+            <!--a tag span é similar a tag div, com o diferencial que ela funciona em linhas ao invés de blocos-->
             <span class="navbar-brand mb-0 h1 text-white fw-bold">Universo Olímpico</span>
+            <!--botão para exibir as seções da página. Cada opção possui um botão integrado que levará a sua respectiva seção-->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon text-white"></span>
             </button>
@@ -36,8 +46,11 @@
             </div>
         </div>
     </nav>
+    <!--Corpo do conteúdo principal da página, onde estarão informações e perguntas-->
     <div class="container py-4 bg-secondary">
+        <!--Seção "Início"-->
         <div class="jumbotron text-center m-auto py-5">
+            <!--Bloco 1-->
             <h1 class="display-4 fw-bold">Seja bem vindo(a), curioso!</h1>
             <p class="lead fw-bold">Neste site, você encontrará curiosidades sobre os atletas Sulamericanos nas Olimpíadas a partir dos anos 2000. Explore conosco e celebre as conquistas do universo olímpico!</p>
         </div>
@@ -47,12 +60,14 @@
             </div>
             <div class="col-12 col-xl-6 m-auto">
                 <div class="jumbotron text-center m-auto py-5">
+                    <!--Bloco 2-->
                     <h1 class="display-6 fw-bold">O que são as Olimpíadas?</h1>
                     <p class="lead fw-bold">As Olimpíadas são o maior evento esportivo do mundo, no qual países dos cinco continentes se reúnem para competir em diversas modalidades. Acontecem a cada quatro anos e são divididos entre as edições de verão e de inverno.</p>
                 </div>
             </div>
         </div>
         <div class="px-4 py-5 mt-4 text-center" id="featured">
+            <!--Bloco 3 (Algumas informações sobre as Olimpíadas, por estilo!)-->
             <h2 class="pb-2">Algumas finalidades das Olimpíadas</h2>
             <div class="row g-4 py-4 row-cols-1 row-cols-lg-3">
                 <div class="feature col">
@@ -90,6 +105,7 @@
                 </div>
             </div>
         </div>
+        <!--Bloco de perguntas-->
         <section id="curiosidades">
             <div class="jumbotron jumbotron-fluid text-center m-auto py-3">
                 <div class="container">
@@ -97,17 +113,22 @@
                     <p class="lead fw-bold">Abaixo estão algumas questões sobre os Sulamericanos nas olimpíadas. Escolha o que você quer saber e deixa que a gente responde!</p>
                 </div>
             </div>
+            <!--Pergunta 1-->
+            <!--Como as perguntas seguem a mesma estrutura, a explicação desta será usada como base para as outras-->
+            <!--Algumas pequenas diferenças são notáveis, entretanto, como a quantidade de opções a serem escolhidas ou dados a serem exibidos, mas isso não interfere na estrutura em si-->
             <div class="row row-cols-1 row-cols-md-3 g-4 py-2">
                 <div class="col">
                     <div class="card bg-dark text-white h-100">
                         <img src="./img/q1.png" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">Pergunta #1</h5>
-                            <p class="card-text">Quantos atletas competiram por determinado pais em um determinado ano?
+                            <p class="card-text">Quantos atletas competiram por determinado pais sulamericano em um determinado ano?
                             </p>
                         </div>
+                        <!--Rodapé simples-->
                         <div class="card-footer p-3">
                             <small class="text-body-secondary">
+                                <!--Este botão exibe um bloco separado que contém a interação de fato, com os dados e o botão de exibição-->
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                     data-bs-target="#modalPerguntaUm">
                                     Ver resposta
@@ -116,18 +137,21 @@
                         </div>
                     </div>
                     <div class="modal fade" id="modalPerguntaUm" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <!--Aqui é o bloco interativo em questão-->
                         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
                             <div class="modal-content bg-dark text-white">
                                 <div class="modal-header">
                                     <h1 class="modal-title fs-5" id="exampleModalLabel">Pergunta #1</h1>
                                     <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
+                                <!--Corpo da pergunta em si-->
                                 <div class="modal-body">
                                     <div class="card bg-dark text-white mb-4">
                                         <div class="card-body">
-                                            <h5 class="mb-4">Quantos atletas competiram por determinado pais em um determinado ano?
+                                            <h5 class="mb-4">Quantos atletas competiram por determinado pais sulamericano em um determinado ano?
                                             </h5>
                                             <div class="row">
+                                                <!--Caixas onde serão selecionados e posteriormente utilizados os dados para a função correspondente à pergunta-->
                                                 <div class="col-3">
                                                     <p>Selecione o país:</p>
                                                     <select id="listaPaisQ1" class="p-2">
@@ -139,6 +163,7 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-3 d-flex align-items-end">
+                                                    <!--!!!Aqui fica o botão essencial que executa a função e trata os dados!!!-->
                                                     <button type="button" class="btn btn-success" id="botao-buscar-q1">Buscar</button>
                                                 </div>
                                                 <br>
@@ -148,6 +173,7 @@
                                                     </div>
                                                 </div>
                                                 <br>
+                                                <!--Por fim, neste mini-bloco será exibido uma lista em forma de tabela, referente a pergunta e seus parâmetros-->
                                                 <table class="table table-striped table-dark">
                                                     <tbody id="tabelaQ1">
                                                     </tbody>
@@ -164,12 +190,13 @@
                         </div>
                     </div>
                 </div>
+                <!--Pergunta 2-->
                 <div class="col">
                     <div class="card bg-dark text-white h-100">
                         <img src="./img/q2.jpg" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">Pergunta #2</h5>
-                            <p class="card-text">Quantos atletas ganharam determinada medalha em determinado ano por determinado pais?</p>
+                            <p class="card-text">Quantos atletas ganharam determinada medalha em determinado ano por determinado pais sulamericano?</p>
                         </div>
                         <div class="card-footer p-3">
                             <small class="text-body-secondary">
@@ -191,7 +218,7 @@
                                     <div class="card bg-dark text-white mb-4">
                                         <div class="card-body">
                                             <h5 class="mb-4">Quantos atletas ganharam determinada medalha em determinado
-                                                ano por determinado pais?
+                                                ano por determinado pais sulamericano?
                                             </h5>
                                             <div class="row">
                                                 <div class="col-3">
@@ -233,12 +260,13 @@
                         </div>
                     </div>
                 </div>
+                <!--Pergunta 3-->
                 <div class="col">
                     <div class="card bg-dark text-white h-100">
                         <img src="./img/q3.jpg" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">Pergunta #3</h5>
-                            <p class="card-text">Quantos atletas que iniciam com determinada letra participaram de determinada olimpiada?</p>
+                            <p class="card-text">Quantos atletas sulamericanos que iniciam com determinada letra participaram de determinada olimpiada?</p>
                         </div>
                         <div class="card-footer p-3">
                             <small class="text-body-secondary">
@@ -259,7 +287,7 @@
                                 <div class="modal-body">
                                     <div class="card bg-dark text-white mb-4">
                                         <div class="card-body">
-                                            <h5 class="mb-4">Quantos atletas que iniciam com determinada letra participaram de determinada olimpiada?
+                                            <h5 class="mb-4">Quantos atletas sulamericanos que iniciam com determinada letra participaram de determinada olimpiada?
                                             </h5>
                                             <div class="row">
                                                 <div class="col-3">
@@ -296,12 +324,13 @@
                         </div>
                     </div>
                 </div>
+                <!--Pergunta 4-->
                 <div class="col">
                     <div class="card bg-dark text-white h-100">
                         <img src="./img/q4.jpg" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">Pergunta #4</h5>
-                            <p class="card-text">Qual o atleta mais velho e mais novo de determinado Pais em determinado ano?
+                            <p class="card-text">Qual o atleta mais velho e mais novo de determinado Pais sulamericano em determinado ano?
                             </p>
                         </div>
                         <div class="card-footer p-3">
@@ -323,7 +352,7 @@
                                 <div class="modal-body">
                                     <div class="card bg-dark text-white mb-4">
                                         <div class="card-body">
-                                            <h5 class="mb-4">Qual o atleta mais velho e mais novo de determinado Pais em determinado ano?
+                                            <h5 class="mb-4">Qual o atleta mais velho e mais novo de determinado Pais sulamericano em determinado ano?
                                             </h5>
                                             <div class="row">
                                                 <div class="col-3">
@@ -360,12 +389,13 @@
                         </div>
                     </div>
                 </div>
+                <!--Por fim, pergunta 5-->
                 <div class="col">
                     <div class="card bg-dark text-white h-100">
                         <img src="./img/q5.jpg" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">Pergunta #5</h5>
-                            <p class="card-text">Compare quantas medalhas os atletas de dois países em determinado ano ganhou.
+                            <p class="card-text">Compare quantas medalhas os atletas de dois países sulamericanos em determinado ano ganhou.
                             </p>
                         </div>
                         <div class="card-footer p-3">
@@ -387,7 +417,7 @@
                                 <div class="modal-body">
                                     <div class="card bg-dark text-white mb-4">
                                         <div class="card-body">
-                                            <h5 class="mb-4">Compare quantas medalhas os atletas de dois países em determinado ano ganhou.
+                                            <h5 class="mb-4">Compare quantas medalhas os atletas de dois países sulamericanos em determinado ano ganhou.
                                             </h5>
                                             <div class="row">
                                                 <div class="col-3">
@@ -432,6 +462,8 @@
             </div>
     </div>
     </section>
+    <!--Seção final com informações do trabalho-->
+    <!--Por ter uma estrutura genérica, esta seção não será elaborada com profundidade-->
     <div class="row container m-auto py-4" id="sobre">
         <div class="col">
             <div class="card bg-dark text-white text-center">
@@ -471,6 +503,8 @@
             </div>
         </div>
     </footer>
+<!--Fim do corpo da página (Para fins de clareza e facilidade ao ler o código)-->
 </body>
 
+<!--Fim do código-->
 </html>
