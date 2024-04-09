@@ -107,12 +107,13 @@ e retorna uma lista com a quantidade de medalhas (ouro prata e bronze) adiquirid
 const totalMedalhasPorPais = (lista) => (pais1) => (pais2) => (ano) => {
     const atletasDoPais1NoAno = lista.filter(item => item.Team === pais1 && item.Year === ano && item.Medal !== '');
     const atletasDoPais2NoAno = lista.filter(item => item.Team === pais2 && item.Year === ano && item.Medal !== '');
-    const medalhasPorAtleta1 = atletasDoPais1NoAno.map(atleta => atleta.Medal);
+    const medalhasPorAtleta1 = atletasDoPais1NoAno.map(atleta => atleta.Medal);//mapeia as listas de atletas filtradas para criar listas contendo apenas os tipos de medalhas (ouro, prata, bronze) que cada atleta ganhou
     const medalhasPorAtleta2 = atletasDoPais2NoAno.map(atleta => atleta.Medal);
 
+    //essa função usa o reduce para contar cada tipo de medalha que cada atleta ganhou
     const contagemMedalhas1 = medalhasPorAtleta1.reduce((contador, medalha) => {
         return {
-            ...contador, [medalha]: (contador[medalha] || 0) + 1 //-----------------????????
+            ...contador, [medalha]: (contador[medalha] || 0) + 1 
         };
     }, { Gold: 0, Silver: 0, Bronze: 0 });
 
@@ -240,7 +241,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.getElementById('spinner-q1').classList.add('d-none');//quando acabar de pesquisar e mostrar o resultado spinner desaparece da tela.
         }
     });
-
+    //agora o que foi feito na q1 é replicado para as outras quatro questões, com as mudanças necessarias nos parametros, ids e o que mais for necessario...
     const botaoBuscarQ2 = document.querySelector('#botao-buscar-q2');
     botaoBuscarQ2.addEventListener("click", async () => {
         const selectPaisQ2 = document.querySelector("#listaPaisQ2");
